@@ -1,4 +1,4 @@
-/* Copyright 2006-2010 the original author or authors.
+/* Copyright 2006-2012 SpringSource.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,8 @@ import org.springframework.security.core.userdetails.UserDetailsByNameServiceWra
 
 class SpringSecurityCasGrailsPlugin {
 
-	String version = '1.0.2'
+	String version = '1.0.3'
 	String grailsVersion = '1.2.3 > *'
-	Map dependsOn = [springSecurityCore: '1.0 > *']
 	List pluginExcludes = [
 		'docs/**',
 		'src/docs/**',
@@ -44,8 +43,12 @@ class SpringSecurityCasGrailsPlugin {
 	String authorEmail = 'beckwithb@vmware.com'
 	String title = 'Jasig CAS support for the Spring Security plugin.'
 	String description = 'Jasig CAS support for the Spring Security plugin.'
-
 	String documentation = 'http://grails.org/plugin/spring-security-cas'
+
+	String license = 'APACHE'
+	def organization = [name: 'SpringSource', url: 'http://www.springsource.org/']
+	def issueManagement = [system: 'JIRA', url: 'http://jira.grails.org/browse/GPSPRINGSECURITYCAS']
+	def scm = [url: 'https://github.com/grails-plugins/grails-spring-security-cas']
 
 	def doWithWebDescriptor = { xml ->
 
@@ -103,15 +106,16 @@ class SpringSecurityCasGrailsPlugin {
 		if (application.warDeployed) {
 			// need to load secondary here since web.xml was already built, so
 			// doWithWebDescriptor isn't called when deployed as war
- 
+
 			SpringSecurityUtils.loadSecondaryConfig 'DefaultCasSecurityConfig'
 			conf = SpringSecurityUtils.securityConfig
-			if (!conf.cas.active) {
-				return
-			}
 		}
 
-		println 'Configuring Spring Security CAS ...'
+		if (!conf.cas.active) {
+			return
+		}
+
+		println '\nConfiguring Spring Security CAS ...'
 
 		SpringSecurityUtils.registerProvider 'casAuthenticationProvider'
 		SpringSecurityUtils.registerFilter 'casAuthenticationFilter', SecurityFilterPosition.CAS_FILTER
@@ -164,5 +168,7 @@ class SpringSecurityCasGrailsPlugin {
 			statelessTicketCache = ref('casStatelessTicketCache')
 			key = conf.cas.key // 'grails-spring-security-cas'
 		}
+
+		println '... finished configuring Spring Security CAS\n'
 	}
 }
